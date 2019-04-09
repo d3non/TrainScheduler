@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Train Scheduler</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="jumbotron">
+            <div class="row justify-content-center">
+                <h1>Anytime is train time</h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h5>Current Train Schedule</h5>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Train Name</th>
+                        <th scope="col">Destination</th>
+                        <th scope="col">Frequency (min)</th>
+                        <th scope="col">Next Arrival</th>
+                        <th scope="col">Minutes Away</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla">
+                </tbody>
+            </table>
+        </div>
+    </div><br>
+
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h5>Add train</h5>
+            </div>
+            <div class="card-body">
+                <form>
+                    <div class="form-group col-md-12">
+                        <label for="inputEmail4">Train Name:</label>
+                        <input type="text" class="form-control" id="inputName" placeholder="Train name">
+                    </div>
+
+                    <div class="form-group col-md-12">
+                        <label for="inputState">Destination:</label>
+                        <input type="text" class="form-control" id="inputDestination" placeholder="Destination">
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-12">
+                        <label for="inputAddress">Frequency (min)</label>
+                        <input type="text" class="form-control" id="inputFrequency" placeholder="In minutes">
+                    </div>
+
+                    <div class="form-group col-md-12">
+                        <label for="inputAddress2">Next Arrival:</label>
+                        <input type="text" class="form-control" id="inputNextArrival" placeholder="08:45 AM">
+                    </div>
+
+                    <div class="form-group col-md-12">
+                        <button id="submit" type="button" class="btn btn-secondary btn-lg">Submit</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+
+
+    </div>
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.9.2/firebase.js"></script>
+    <script>
+
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyCVIh3KHu5UQkcqIboLWDcFXq7qjsoqIvM",
+            authDomain: "fir-bc-a6049.firebaseapp.com",
+            databaseURL: "https://fir-bc-a6049.firebaseio.com",
+            projectId: "fir-bc-a6049",
+            storageBucket: "fir-bc-a6049.appspot.com",
+            messagingSenderId: "693946832457"
+        };
+        firebase.initializeApp(config);
+
+        var database = firebase.database();
+
+        var name = "";
+        var destination = "";
+        var frequency = 0;
+        var nextArrival = "00:00";
+
+        $("#submit").on("click", function (event) {
+            event.preventDefault();
+
+            name = $("#inputName").val().trim();
+            rate = $("#inputDestination").val().trim();
+            role = $("#inputFrequency").val().trim();
+            startDate = $("#inputNextArrival").val().trim();
+
+            database.ref().push({
+                name: name,
+                destination: destination,
+                frequency: frequency,
+                nextArrival: nextArrival
+            });
+
+        });
+
+        database.ref().on("value", function (snapshot) {
+
+            var formatoBase = "MM/DD/YYYY";
+            var startDateJS = moment(startDate, formatoBase);
+            var monthsWorked = startDateJS.diff(moment(), "months");
+            console.log(monthsWorked);
+            var totalEarnings = monthsWorked * rate;
+            $("#tabla").last().append("<tr><td>"+ name + "</td><td>" + destination + "</td><td>" + frequency + "</td><td>" + nextArrival + "</td><td>" + monthsWorked + "</td></tr>");
+
+
+            // Print the initial data to the console.
+            console.log(snapshot.val());
+
+            // Log the value of the various properties
+            console.log(snapshot.val().name);
+            console.log(snapshot.val().rate);
+            console.log(snapshot.val().role);
+            console.log(snapshot.val().startDate);
+
+        }, function (errorObject) {
+            console.log("The read failed: " + errorObject.code);
+        });
+        dataRef.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function (snapshot) {
+            // Change the HTML to reflect
+            $("#inputName").text(snapshot.val().name);
+            $("#inputDestination").text(snapshot.val().rate);
+            $("#inputFrequency").text(snapshot.val().role);
+            $("#inputNextArrival").text(snapshot.val().startDate);
+        });
+
+    </script>
+
+</body>
+
+</html>

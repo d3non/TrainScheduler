@@ -109,8 +109,25 @@
                 var destination =childData.destination;
                 var frequency =childData.frequency;
                 var firstTrip =childData.firstTrip;
-                console.log(childData);
-                $("#tabla").append("<tr><td>"+ name + "</td><td>" + destination + "</td><td>" + frequency + "</td><td>" + firstTrip + "</td><td>" + "To do" + "</td></tr>");
+                
+                //I'm trying to make this work, i still don't have it, need more time!!!
+                //console.log(getNextTrain(firstTrip, frequency));
+
+                var scheduleAll = [];
+                var scheduleAll = getTrainSchedule(firstTrip, frequency);
+                var nextTrain = getNextTrainSchedule(scheduleAll);
+
+                var current = moment();
+                
+                var hour = nextTrain.substring(0, 2);
+                var min = nextTrain.substring(3, 5);
+                var trainTime = moment({ h: hour, m: min });
+
+                var duration = moment.duration(trainTime.diff(current));
+                var minutes = duration.minutes(); //minutes instead of asMinutes
+                //alert(minutes);
+
+                $("#tabla").append("<tr><td>"+ name + "</td><td>" + destination + "</td><td>" + frequency + "</td><td>" + nextTrain + "</td><td>" + minutes + " min" + "</td></tr>");
             });
         });
 
@@ -122,7 +139,7 @@
 
         $("#submit").on("click", function (event) {
             event.preventDefault();
-            //$("#tabla").empty();
+            $("#tabla").empty();
             name = $("#inputName").val().trim();
             destination = $("#inputDestination").val().trim();
             frequency = $("#inputFrequency").val().trim();
@@ -142,6 +159,58 @@
             $("#inputFirstTrip").val("");
 
         });
+
+    //scheduleAll = getTrainSchedule(firstTrip, frequency);
+
+    //var nextTrain = getNextTrainSchedule(scheduleAll);
+    //alert("Next train available: " + nextTrain);
+
+    function getTrainSchedule(firstTrip, frequency){
+        var endDay = moment({ h: 23, m: 59 });
+        var endTime = moment({ h: 00, m: 00 });
+
+        var schedule = [];
+        var hour = firstTrip.substring(0, 2);
+        var min = firstTrip.substring(3, 5);
+
+        var beginningTime = moment({ h: hour, m: min });
+        schedule.push(beginningTime.format('HH:mm'));
+        var result = endTime.isBefore(endDay);
+        
+        while(result){
+            endTime = moment(beginningTime, 'HH:mm').add(frequency, 'minutes');
+            schedule.push(endTime.format('HH:mm'));
+            beginningTime = endTime;
+            result = endTime.isBefore(endDay);
+        }
+    
+        schedule.pop();
+        return schedule;
+    }
+
+    function getNextTrainSchedule(schedule){
+        
+        var trainTime = "00:00";
+        var current = moment();
+        var hour = firstTrip.substring(0, 2);
+        var min = firstTrip.substring(3, 5);
+
+        for(i=0; i<schedule.length; i++){
+            var val = schedule[i];
+            var hour = val.substring(0, 2);
+            var min = val.substring(3, 5);
+            trainTime = moment({ h: hour, m: min });
+
+            var flag = trainTime.isBefore(current);
+            if(!flag){
+                return trainTime.format('HH:mm');
+
+            }
+        }
+
+
+        return trainTime;
+    }
 
     </script>
 

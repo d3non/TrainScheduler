@@ -61,13 +61,13 @@
                     </div>
 
                     <div class="form-group col-md-12">
-                        <label for="inputAddress">Frequency (min)</label>
-                        <input type="text" class="form-control" id="inputFrequency" placeholder="In minutes">
+                        <label for="firstTrip">First Train Time:</label>
+                        <input type="text" class="form-control" id="inputFirstTrip" placeholder="08:45 AM">
                     </div>
 
                     <div class="form-group col-md-12">
-                        <label for="inputAddress2">Next Arrival:</label>
-                        <input type="text" class="form-control" id="inputNextArrival" placeholder="08:45 AM">
+                        <label for="inputAddress">Frequency (min)</label>
+                        <input type="text" class="form-control" id="inputFrequency" placeholder="In minutes">
                     </div>
 
                     <div class="form-group col-md-12">
@@ -100,56 +100,47 @@
 
         var database = firebase.database();
 
+        var ref = database.ref();
+        ref.on('value', function(snapshot) {
+            console.log(snapshot);
+            snapshot.forEach(function(childSnapshot) {
+                var childData = childSnapshot.val();
+                var name =childData.name;
+                var destination =childData.destination;
+                var frequency =childData.frequency;
+                var firstTrip =childData.firstTrip;
+                console.log(childData);
+                $("#tabla").append("<tr><td>"+ name + "</td><td>" + destination + "</td><td>" + frequency + "</td><td>" + firstTrip + "</td><td>" + "To do" + "</td></tr>");
+            });
+        });
+
+
         var name = "";
         var destination = "";
         var frequency = 0;
-        var nextArrival = "00:00";
+        var firstTrip = "00:00";
 
         $("#submit").on("click", function (event) {
             event.preventDefault();
-
+            //$("#tabla").empty();
             name = $("#inputName").val().trim();
-            rate = $("#inputDestination").val().trim();
-            role = $("#inputFrequency").val().trim();
-            startDate = $("#inputNextArrival").val().trim();
+            destination = $("#inputDestination").val().trim();
+            frequency = $("#inputFrequency").val().trim();
+            firstTrip = $("#inputFirstTrip").val().trim();
 
             database.ref().push({
                 name: name,
                 destination: destination,
                 frequency: frequency,
-                nextArrival: nextArrival
+                firstTrip: firstTrip
             });
+            alert("Train successfully added");
+            // Clears all of the text-boxes
+            $("#inputName").val("");
+            $("#inputDestination").val("");
+            $("#inputFrequency").val("");
+            $("#inputFirstTrip").val("");
 
-        });
-
-        database.ref().on("value", function (snapshot) {
-
-            var formatoBase = "MM/DD/YYYY";
-            var startDateJS = moment(startDate, formatoBase);
-            var monthsWorked = startDateJS.diff(moment(), "months");
-            console.log(monthsWorked);
-            var totalEarnings = monthsWorked * rate;
-            $("#tabla").last().append("<tr><td>"+ name + "</td><td>" + destination + "</td><td>" + frequency + "</td><td>" + nextArrival + "</td><td>" + monthsWorked + "</td></tr>");
-
-
-            // Print the initial data to the console.
-            console.log(snapshot.val());
-
-            // Log the value of the various properties
-            console.log(snapshot.val().name);
-            console.log(snapshot.val().rate);
-            console.log(snapshot.val().role);
-            console.log(snapshot.val().startDate);
-
-        }, function (errorObject) {
-            console.log("The read failed: " + errorObject.code);
-        });
-        dataRef.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function (snapshot) {
-            // Change the HTML to reflect
-            $("#inputName").text(snapshot.val().name);
-            $("#inputDestination").text(snapshot.val().rate);
-            $("#inputFrequency").text(snapshot.val().role);
-            $("#inputNextArrival").text(snapshot.val().startDate);
         });
 
     </script>

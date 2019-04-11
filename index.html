@@ -103,6 +103,7 @@
         var ref = database.ref();
         ref.on('value', function(snapshot) {
             console.log(snapshot);
+            $("#tabla").empty();
             snapshot.forEach(function(childSnapshot) {
                 var childData = childSnapshot.val();
                 var name =childData.name;
@@ -139,7 +140,6 @@
 
         $("#submit").on("click", function (event) {
             event.preventDefault();
-            $("#tabla").empty();
             name = $("#inputName").val().trim();
             destination = $("#inputDestination").val().trim();
             frequency = $("#inputFrequency").val().trim();
